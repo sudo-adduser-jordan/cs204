@@ -1,9 +1,70 @@
-Computer Science 204 - Assignment 1: Creating & Manipulating a Database
+-- Computer Science 204 - Assignment 1: Creating & Manipulating a Database
 
--- QUERIES AND RESULTS
-    -- Display all contents of the Clients table
+-- Note to the person grading the assignment. Change the file extension to .sql 
+-- for syntax highlighting. Cheers
+
+-- PART A: CREATE TABLES
+    CREATE TABLE Client (
+        ClientID            INT NOT NULL AUTO_INCREMENT,
+        ClientFirstName     VARCHAR(255) NOT NULL,
+        ClientLastName      VARCHAR(255) NOT NULL,
+        ClientDoB           INT NOT NULL,
+        Occupation          VARCHAR(255) NOT NULL,
+        PRIMARY KEY (ClientID)
+    );
+
+    CREATE TABLE Author (
+        AuthorID            INT NOT NULL AUTO_INCREMENT,
+        AuthorFirstName     VARCHAR(255) NOT NULL,
+        AuthorLastName      VARCHAR(255) NOT NULL,
+        AuthorNationality   VARCHAR(255) NOT NULL,
+        PRIMARY KEY (AuthorID)
+    );
+
+    CREATE TABLE Book (
+        BookID              INT NOT NULL AUTO_INCREMENT,
+        BookTitle           VARCHAR(255) NOT NULL,
+        BookAuthor          INT NOT NULL,
+        Genre               VARCHAR(255) NOT NULL,
+        PRIMARY KEY (BookID),
+        FOREIGN KEY (BookAuthor)    REFERENCES Author (AuthorID)
+    );
+
+    CREATE TABLE Borrower (
+        BorrowID            INT NOT NULL AUTO_INCREMENT,
+        ClientID            INT NOT NULL,
+        BookID              INT NOT NULL,
+        BorrowDate          DATE NOT NULL,
+        PRIMARY KEY (BorrowID),
+        FOREIGN KEY (ClientID)      REFERENCES Client (ClientID), 
+        FOREIGN KEY (BookID)        REFERENCES Book (BookID)
+    );
+
+-- PART B: POPULATE DATABASE
+    -- Load data from text file.
+    LOAD DATA LOCAL INFILE 'client.txt'     INTO TABLE client;
+    LOAD DATA LOCAL INFILE 'borrower.txt'   INTO TABLE borrower;
+    LOAD DATA LOCAL INFILE 'book.txt'       INTO TABLE book;
+    LOAD DATA LOCAL INFILE 'author.txt'     INTO TABLE author;
+
+    -- The data can also be loaded with an INSERT statment. However this is method is more tedious
+    -- and unrealistic with large datasets.
+    -- VALUES excluded for brevity
+    INSERT INTO Author (AuthorId, AuthorFirstName, AuthorLastName, AuthorNationality) VALUES
+    INSERT INTO Book (BookId, BookTitle, BookAuthor, Genre) VALUES
+    INSERT INTO Client (ClientId, ClientFirstName, ClientLastName, ClientDoB, Occupation) VALUES
+    INSERT INTO Borrower (BorrowId, ClientId, BookId, BorrowDate) VALUES
+
+-- PART C: QUERIES AND RESULTS
+    -- Indexs
+    -- WHERE AND JOIN 
+        CREATE INDEX idx_customer_id ON customers (customer_id);
+        CREATE INDEX idx_order_id ON orders (order_id);
+
+    -- Query 1: Display all contents of the Clients table
         SELECT * 
         FROM Client
+        -- Select all columns from the Client table.
     -- Result
         ClientID	ClientFirstName	ClientLastName	ClientDoB	Occupation
         1	Kaiden	Hill	2006	Student
@@ -87,9 +148,10 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         79	Alysha	Lambert	2007	Student
         80	Maia	Grant	1984	School Teacher
 
-    -- First names, last names, ages and occupations of all clients
+    -- Query 2: First names, last names, ages and occupations of all clients
         SELECT ClientFirstName, ClientLastName, ClientDoB 
         FROM Client
+        -- Select ClientFirstName, ClientLastName, ClientDoB columns from Client table.
     -- Result
         ClientFirstName	ClientLastName	ClientDoB
         Kaiden	Hill	2006
@@ -173,13 +235,15 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Alysha	Lambert	2007
         Maia	Grant	1984
 
-    -- First and last names of clients that borrowed books in March 2018
+    -- Query 3: First and last names of clients that borrowed books in March 2018
         SELECT ClientFirstName, ClientLastName 
         FROM Client 
         WHERE ClientId IN (
             SELECT ClientId
             FROM Borrower 
-            WHERE BorrowDate >= Date('2018-03-01') AND BorrowDate <= Date('2018-03-31')); 
+            WHERE BorrowDate >= Date('2018-03-01') AND BorrowDate <= Date('2018-03-31'));
+        -- Select ClientFirstName, ClientLastName columns from Client table.
+        -- Using a IN operator to select only the values within the DATE value March. 
     -- Result
         ClientFirstName	ClientLastName
         Maia	Grant
@@ -191,7 +255,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Gerard	Jackson
         Carson	Byrne
     
-     -- First and last names of the top 5 authors clients borrowed in 2017
+     -- Query 4: First and last names of the top 5 authors clients borrowed in 2017
         SELECT Author.AuthorFirstName, Author.AuthorLastName
         FROM Author 
             INNER JOIN Book ON Book.BookAuthor = Author.AuthorId
@@ -200,6 +264,14 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         GROUP BY Author.AuthorId
         ORDER BY COUNT(Author.AuthorId) DESC
         LIMIT 5;
+        -- Select Author.AuthorFirstName, Author.AuthorLastName columns from the Author Table.
+        -- Join the Book table on the condition that the BookAuthor field in the Book table 
+        -- matches the AuthorId field in the Author table.
+        -- Join the Borrower table on the condition that the BookId field in the 
+        -- Borrower table matches the BookId field in the Book table.
+        -- Filter the results based on the BorrowDate.
+        -- Group the results by AuthorId and order results in descending order.
+        -- Return the top 5 results with the LIMIT operator.
     -- Result
         AuthorFirstName	AuthorLastName
         Sofia	Smith
@@ -208,7 +280,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Maria	Brown
         Zoe	Roy
     
-     -- Nationalities of the least 5 authors that clients borrowed during the years 2015-2017
+     -- Query 5: Nationalities of the least 5 authors that clients borrowed during the years 2015-2017
         SELECT Author.AuthorNationality 
         FROM Author 
             INNER JOIN Book ON Book.BookAuthor = Author.AuthorId
@@ -217,6 +289,14 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         GROUP BY Author.AuthorNationality
         ORDER BY COUNT(Author.AuthorNationality) ASC
         LIMIT 5;
+        -- Select Author.AuthorNationality column from the Author Table.
+        -- Join the Book table on the condition that the BookAuthor field in the Book table 
+        -- matches the AuthorId field in the Author table.
+        -- Join the Borrower table on the condition that the BookId field in the 
+        -- Borrower table matches the BookId field in the Book table.
+        -- Filter the results based on the BorrowDate.
+        -- Group the results by AuthorNationality and order results in ascending order.
+        -- Return the top 5 results with the LIMIT operator.
     -- Result
         AuthorNationality
         Spain
@@ -225,7 +305,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Brazil
         France
     
-    -- The book that was most borrowed during the years 2015-2017
+    -- Query 6: The book that was most borrowed during the years 2015-2017
         SELECT Book.BookTitle 
         FROM Book 
             INNER JOIN Borrower ON Borrower.BookId = Book.BookId
@@ -233,11 +313,24 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         GROUP BY Book.BookID
         ORDER BY COUNT(Borrower.BookId) DESC
         LIMIT 1;
+        -- Select Book.BookTitle column from the Book Table.
+        -- Join the Borrower table on the condition that the BookId field in the 
+        -- Borrower table matches the BookId field in the Book table.
+        -- Filter the results based on the BorrowDate.
+        -- Group the results by Book.BookID.
+        -- Using the COUNT function, return the number of rows that matches the BookID.
+        -- Order results in descending order.
+        -- Return the top result with the LIMIT operator.
     -- Result
         BookTitle
         The perfect match
+
+
+
+
+
     
-    -- Top borrowed genres for client born in years 1970-1980
+    -- Query 7: Top borrowed genres for client born in years 1970-1980
         SELECT Book.Genre FROM Book 
             INNER JOIN Borrower ON Borrower.BookId = Book.BookId
             INNER JOIN Client ON Client.ClientId = Borrower.ClientId
@@ -253,7 +346,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Humor
         Society
     
-    -- Top 5 occupations that borrowed the most in 2016
+    -- Query 8: Top 5 occupations that borrowed the most in 2016
         SELECT Client.Occupation FROM Client
             INNER JOIN Borrower ON Borrower.ClientId = Client.ClientId
         WHERE Borrower.BorrowDate >= Date('2016-01-01') AND Borrower.BorrowDate <= Date('2016-12-31')
@@ -268,7 +361,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Computer Programmer
         Police Officer
     
-    -- Average number of borrowed books by job title
+    -- Query 9: Average number of borrowed books by job title
         SELECT c.Occupation, COUNT(c.Occupation) / (SELECT COUNT(Occupation) 
                                                     FROM Client 
                                                     WHERE Occupation = c.Occupation 
@@ -313,7 +406,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Licensed Massage Therapist	2.0000
         Parquet Floor Layer	2.0000
 
-    -- Create a VIEW and display the titles that were borrowed by at least 20% of clients
+    -- Query 10: Create a VIEW and display the titles that were borrowed by at least 20% of clients
         CREATE VIEW Titles_Borrowed AS
         SELECT Book.BookTitle 
         FROM Book
@@ -321,13 +414,14 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
             INNER JOIN Client ON Client.ClientId = Borrower.ClientId
         GROUP BY Book.BookId
         HAVING COUNT(Book.BookId) / (SELECT COUNT(ClientId) FROM Client) >= 0.2;
+
         SELECT *
-        FROM Titles_Borrowed;
+        FROM Titles_Borrowed;   
     -- Result
         BookTitle
         Electrical transformers
     
-    -- The top month of borrows in 2017
+    -- Query 11: The top month of borrows in 2017
         SELECT MONTH(BorrowDate) 
         FROM Borrower 
         WHERE BorrowDate >= Date('2017-01-01') AND BorrowDate <= Date('2017-12-31')
@@ -338,7 +432,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         MONTH(BorrowDate)
         8
     
-    -- Average number of borrows by age
+    -- Query 12: Average number of borrows by age
         SELECT YEAR(CURDATE()) - ClientDoB AS Age, COUNT(YEAR(CURDATE()) - ClientDoB) / 
             (SELECT COUNT(YEAR(CURDATE()) - ClientDoB) 
             FROM Client 
@@ -389,7 +483,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         62	3.0000
         64	3.6667
     
-    -- The oldest and the youngest clients of the library
+    -- Query 13: The oldest and the youngest clients of the library
         (SELECT ClientFirstName, ClientLastName, ClientDoB 
         FROM Client
         ORDER BY ClientDoB ASC LIMIT 1) 
@@ -402,7 +496,7 @@ Computer Science 204 - Assignment 1: Creating & Manipulating a Database
         Mya	Austin	1960
         Alina	Morton	2010
 
-    -- First and last names of authors that wrote books in more than one Genre
+    -- Query 14: First and last names of authors that wrote books in more than one Genre
         SELECT AuthorFirstName, AuthorLastName 
         FROM Author a
             INNER JOIN Book ON Book.BookAuthor = a.AuthorId
