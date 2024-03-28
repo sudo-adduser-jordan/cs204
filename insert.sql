@@ -1,7 +1,7 @@
 INSERT INTO Author (AuthorId, AuthorFirstName, AuthorLastName, AuthorNationality) 
 VALUES  
 (1,'Sofia','Smith','Canada'),
-(2,'Maria','Brown','Brezil'),
+(2,'Maria','Brown','Brazil'),
 (3,'Elena','Martin','Mexico'),
 (4,'Zoe','Roy','France'),
 (5,'Sebastian','Lavoie','Canada'),
