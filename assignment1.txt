@@ -51,15 +51,19 @@
     -- and unrealistic with large datasets.
     -- VALUES excluded for brevity
     INSERT INTO Author (AuthorId, AuthorFirstName, AuthorLastName, AuthorNationality) VALUES
-    INSERT INTO Book (BookId, BookTitle, BookAuthor, Genre) VALUES
+    INSERT INTO Book (BookID, BookTitle, BookAuthor, Genre) VALUES
     INSERT INTO Client (ClientId, ClientFirstName, ClientLastName, ClientDoB, Occupation) VALUES
-    INSERT INTO Borrower (BorrowId, ClientId, BookId, BorrowDate) VALUES
+    INSERT INTO Borrower (BorrowId, ClientId, BookID, BorrowDate) VALUES
 
 -- PART C: QUERIES AND RESULTS
     -- Indexs
-    -- WHERE AND JOIN 
-        CREATE INDEX idx_customer_id ON customers (customer_id);
-        CREATE INDEX idx_order_id ON orders (order_id);
+            CREATE INDEX index_BookID ON Book (BookID);
+            CREATE INDEX index_ClientID ON Client (ClientID);
+            CREATE INDEX index_BorrowerID ON Borrower (BorrowID);
+            CREATE INDEX index_Borrower_Book ON Borrower(BookID);
+            CREATE INDEX index_Book_Author ON Borrower(AuthorID);
+            CREATE INDEX index_BorrowDate ON Borrower(BorrowDate);
+        -- Indexes created for common queries below.
 
     -- Query 1: Display all contents of the Clients table
         SELECT * 
@@ -259,16 +263,16 @@
         SELECT Author.AuthorFirstName, Author.AuthorLastName
         FROM Author 
             INNER JOIN Book ON Book.BookAuthor = Author.AuthorId
-            INNER JOIN Borrower ON Borrower.BookId = Book.BookId
+            INNER JOIN Borrower ON Borrower.BookID = Book.BookID
         WHERE BorrowDate >= Date('2017-01-01') AND BorrowDate <= Date('2017-12-31')
         GROUP BY Author.AuthorId
         ORDER BY COUNT(Author.AuthorId) DESC
         LIMIT 5;
-        -- Select Author.AuthorFirstName, Author.AuthorLastName columns from the Author Table.
+        -- Select AuthorFirstName, AuthorLastName columns from the Author Table.
         -- Join the Book table on the condition that the BookAuthor field in the Book table 
         -- matches the AuthorId field in the Author table.
-        -- Join the Borrower table on the condition that the BookId field in the 
-        -- Borrower table matches the BookId field in the Book table.
+        -- Join the Borrower table on the condition that the BookID field in the 
+        -- Borrower table matches the BookID field in the Book table.
         -- Filter the results based on the BorrowDate.
         -- Group the results by AuthorId and order results in descending order.
         -- Return the top 5 results with the LIMIT operator.
@@ -284,16 +288,16 @@
         SELECT Author.AuthorNationality 
         FROM Author 
             INNER JOIN Book ON Book.BookAuthor = Author.AuthorId
-            INNER JOIN Borrower ON Borrower.BookId = Book.BookId
+            INNER JOIN Borrower ON Borrower.BookID = Book.BookID
         WHERE BorrowDate >= Date('2015-01-01') AND BorrowDate <= Date('2017-12-31')
         GROUP BY Author.AuthorNationality
         ORDER BY COUNT(Author.AuthorNationality) ASC
         LIMIT 5;
-        -- Select Author.AuthorNationality column from the Author Table.
+        -- Select AuthorNationality column from the Author Table.
         -- Join the Book table on the condition that the BookAuthor field in the Book table 
         -- matches the AuthorId field in the Author table.
-        -- Join the Borrower table on the condition that the BookId field in the 
-        -- Borrower table matches the BookId field in the Book table.
+        -- Join the Borrower table on the condition that the BookID field in the 
+        -- Borrower table matches the BookID field in the Book table.
         -- Filter the results based on the BorrowDate.
         -- Group the results by AuthorNationality and order results in ascending order.
         -- Return the top 5 results with the LIMIT operator.
@@ -308,16 +312,16 @@
     -- Query 6: The book that was most borrowed during the years 2015-2017
         SELECT Book.BookTitle 
         FROM Book 
-            INNER JOIN Borrower ON Borrower.BookId = Book.BookId
+            INNER JOIN Borrower ON Borrower.BookID = Book.BookID
         WHERE BorrowDate >= Date('2015-01-01') AND BorrowDate <= Date('2017-12-31')
         GROUP BY Book.BookID
-        ORDER BY COUNT(Borrower.BookId) DESC
+        ORDER BY COUNT(Borrower.BookID) DESC
         LIMIT 1;
-        -- Select Book.BookTitle column from the Book Table.
-        -- Join the Borrower table on the condition that the BookId field in the 
-        -- Borrower table matches the BookId field in the Book table.
+        -- Select BookTitle column from the Book Table.
+        -- Join the Borrower table on the condition that the BookID field in the 
+        -- Borrower table matches the BookID field in the Book table.
         -- Filter the results based on the BorrowDate.
-        -- Group the results by Book.BookID.
+        -- Group the results by BookID.
         -- Using the COUNT function, return the number of rows that matches the BookID.
         -- Order results in descending order.
         -- Return the top result with the LIMIT operator.
@@ -325,19 +329,24 @@
         BookTitle
         The perfect match
 
-
-
-
-
-    
     -- Query 7: Top borrowed genres for client born in years 1970-1980
         SELECT Book.Genre FROM Book 
-            INNER JOIN Borrower ON Borrower.BookId = Book.BookId
+            INNER JOIN Borrower ON Borrower.BookID = Book.BookID
             INNER JOIN Client ON Client.ClientId = Borrower.ClientId
         WHERE Client.ClientDoB >= 1970 AND Client.ClientDoB <= 1980
         GROUP BY Book.Genre
         ORDER BY COUNT(Book.Genre) DESC
         LIMIT 5;
+        -- Select Genre column from the Book Table.
+        -- Join the Borrower table on the condition that the BookID field in the 
+        -- Borrower table matches the BookID field in the Book table.
+        -- Join the Client table on the condition that the ClientID field in the 
+        -- Client table matches the ClientID field in the Borrower table.
+        -- Filter the results based on the ClientDoB.
+        -- Group the results by Genre.
+        -- Using the COUNT function, return the number of rows that matches the Genre.
+        -- Order results in descending order.
+        -- Return the top five results with the LIMIT operator.
     -- Result
         Genre
         Science
@@ -353,6 +362,14 @@
         GROUP BY Client.Occupation
         ORDER BY COUNT(Client.Occupation) DESC
         LIMIT 5;
+        -- Select Occupation column from the Client Table.
+        -- Join the Borrower table on the condition that the ClientID field in the 
+        -- Borrower table matches the ClientID field in the Client table.
+        -- Filter the results based on the BorrowDate.
+        -- Group the results by Occupation.
+        -- Using the COUNT function, return the number of rows that matches the Occupation.
+        -- Order results in descending order.
+        -- Return the top five results with the LIMIT operator.
     -- Result
         Occupation
         Student
@@ -360,7 +377,7 @@
         Dentist
         Computer Programmer
         Police Officer
-    
+
     -- Query 9: Average number of borrowed books by job title
         SELECT c.Occupation, COUNT(c.Occupation) / (SELECT COUNT(Occupation) 
                                                     FROM Client 
@@ -371,6 +388,12 @@
             INNER JOIN Borrower ON Borrower.ClientId = c.ClientId
         GROUP BY c.Occupation
         ORDER BY AverageBorrowed DESC;
+        -- Select occupations from the Client table.
+        -- Select and calculate the average number of items borrowed by clients with the same occupation.
+        -- Join the Borrower table on the condition that the ClientID field in the 
+        -- Borrower table matches the ClientID field in the Client table.
+        -- Group by occupations.
+        -- Order results in descending order.
     -- Result
         Occupation	AverageBorrowed
         Nurse	7.0000
@@ -410,13 +433,23 @@
         CREATE VIEW Titles_Borrowed AS
         SELECT Book.BookTitle 
         FROM Book
-            INNER JOIN Borrower ON Borrower.BookId = Book.BookId
+            INNER JOIN Borrower ON Borrower.BookID = Book.BookID
             INNER JOIN Client ON Client.ClientId = Borrower.ClientId
-        GROUP BY Book.BookId
-        HAVING COUNT(Book.BookId) / (SELECT COUNT(ClientId) FROM Client) >= 0.2;
+        GROUP BY Book.BookID
+        HAVING COUNT(Book.BookID) / (SELECT COUNT(ClientId) FROM Client) >= 0.2;
 
         SELECT *
-        FROM Titles_Borrowed;   
+        FROM Titles_Borrowed;
+        -- Create view Titles_Borrowed based on the following select query.
+        -- Select BookTitle from the table Book.
+        -- Join the Borrower table on the condition that the BookID field in the 
+        -- Borrower table matches the BookID field in the Book table.
+        -- Join the Client table on the condition that the ClientID field in the 
+        -- Client table matches the ClientID field in the Borrower table.
+        -- Group results by BookID.
+        -- Filter the results by the number of total books borrowed divided by the number of 
+        -- clients that are greater or equal to 20%.
+        -- Select all from the Titles_Borrowed to view the table.
     -- Result
         BookTitle
         Electrical transformers
@@ -428,6 +461,11 @@
         GROUP BY MONTH(BorrowDate)
         ORDER BY COUNT(MONTH(BorrowDate)) DESC
         LIMIT 1;
+        -- Select and count the BorrowDates from the Borrow Table.
+        -- Filter the results by the date 2017.
+        -- Group results by BorrowDate month. This returns a number corresponding the month.
+        -- Order by month in descending order.
+        -- Return the top month.
     -- Result
         MONTH(BorrowDate)
         8
@@ -442,6 +480,15 @@
             INNER JOIN Borrower ON Borrower.ClientId = Client.ClientId
         GROUP BY Age
         ORDER BY Age ASC;
+        -- Select and calculate the age of the client by subtracting their date of birth (ClientDoB)
+        -- from the current year.
+        -- Select and calculate the average number of items borrowed by clients with the same age. 
+        -- It counts the occurrences of each age in the Client table and divides it by the count of 
+        -- total records where the age matches the current age being evaluated.
+        -- Set column name to AverageBorrowed.
+        -- Join the Borrower table on the condition that the ClientID field in the 
+        -- Borrower table matches the ClientID field in the Client table.
+        -- Group and order by age in ascending order.
     -- Result
         Age	AverageBorrowed
         14	2.3333
@@ -486,11 +533,24 @@
     -- Query 13: The oldest and the youngest clients of the library
         (SELECT ClientFirstName, ClientLastName, ClientDoB 
         FROM Client
-        ORDER BY ClientDoB ASC LIMIT 1) 
+        ORDER BY ClientDoB ASC 
+        LIMIT 1) 
         UNION
         (SELECT ClientFirstName, ClientLastName, ClientDoB 
         FROM Client
-        ORDER BY ClientDoB DESC LIMIT 1);
+        ORDER BY ClientDoB DESC 
+        LIMIT 1);
+        -- Select the ClientFirstName, ClientLastName, and ClientDoB columns from the Client table.
+        -- Order the results by ClientDoB in ascending order.
+        -- Return the top date of birth.
+        -- The UNION operator is used to combine the results of the first subquery with the results 
+        -- of the second subquery.
+        -- Select the ClientFirstName, ClientLastName, and ClientDoB columns from the Client table.
+        -- It orders the results by ClientDoB in descending order.
+        -- Return the top date of birth.
+        -- The combined results using the UNION operator will include the youngest client followed 
+        -- by the oldest client 
+
     -- Result
         ClientFirstName	ClientLastName	ClientDoB
         Mya	Austin	1960
@@ -506,5 +566,10 @@
                 WHERE a.AuthorId = Book.BookAuthor 
                 GROUP BY Genre) AS Number_Of_Genres) > 1
         GROUP BY AuthorId;
+        -- Select AuthorFirstName and AuthorLastName from the Author table.
+        -- Joins the Author table with the Book table based on the AuthorId and BookAuthor columns.
+        -- This subquery counts the number of unique genres associated with each author's books
+        -- if an author has written books in more than one genre.
+        -- Group by the AuthorID.
     -- Result
         No rows.
