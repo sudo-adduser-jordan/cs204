@@ -37,20 +37,24 @@
     );
 
 -- POPULATE DATABASE
-    -- SHOW GLOBAL VARIABLES LIKE 'local_infile'; 
-    -- SET GLOBAL local_infile = TRUE;
-
+    -- Load data from text file.
     LOAD DATA LOCAL INFILE 'client.txt'     INTO TABLE client;
     LOAD DATA LOCAL INFILE 'borrower.txt'   INTO TABLE borrower;
     LOAD DATA LOCAL INFILE 'book.txt'       INTO TABLE book;
     LOAD DATA LOCAL INFILE 'author.txt'     INTO TABLE author;
 
+    INSERT INTO Author (AuthorId, AuthorFirstName, AuthorLastName, AuthorNationality) VALUES
+    INSERT INTO Book (BookID, BookTitle, BookAuthor, Genre) VALUES
+    INSERT INTO Client (ClientId, ClientFirstName, ClientLastName, ClientDoB, Occupation) VALUES
+    INSERT INTO Borrower (BorrowId, ClientId, BookID, BorrowDate) VALUES
+
 -- INDEXES
-    CREATE INDEX index_name
-        ON table_name (column1, column2, ...);
-    
-    CREATE UNIQUE INDEX index_name
-        ON table_name (column1, column2, ...); 
+    CREATE INDEX index_BookID ON Book (BookID);
+    CREATE INDEX index_ClientID ON Client (ClientID);
+    CREATE INDEX index_BorrowerID ON Borrower (BorrowID);
+    CREATE INDEX index_Borrower_Book ON Borrower(BookID);
+    CREATE INDEX index_Book_Author ON Borrower(AuthorID);
+    CREATE INDEX index_BorrowDate ON Borrower(BorrowDate);
 
 -- QUERIES
     -- Display all contents of the Clients table

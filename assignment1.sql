@@ -56,7 +56,7 @@
     INSERT INTO Borrower (BorrowId, ClientId, BookID, BorrowDate) VALUES
 
 -- PART C: QUERIES AND RESULTS
-    -- Indexs
+    -- Indexes
             CREATE INDEX index_BookID ON Book (BookID);
             CREATE INDEX index_ClientID ON Client (ClientID);
             CREATE INDEX index_BorrowerID ON Borrower (BorrowID);
